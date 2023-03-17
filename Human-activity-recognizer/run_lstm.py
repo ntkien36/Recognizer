@@ -4,14 +4,14 @@ import numpy as np
 import threading
 import tensorflow as tf
 
-label = "Warmup...."
+label = "Warm up...."
 n_time_steps = 10
 lm_list = []
 
 mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 mpDraw = mp.solutions.drawing_utils
-
+#load model
 model = tf.keras.models.load_model("model.h5")
 
 cap = cv2.VideoCapture(0)
@@ -30,7 +30,7 @@ def draw_landmark_on_image(mpDraw, results, img):
     mpDraw.draw_landmarks(img, results.pose_landmarks, mpPose.POSE_CONNECTIONS)
     for id, lm in enumerate(results.pose_landmarks.landmark):
         h, w, c = img.shape
-        print(id, lm)
+        #print(id, lm)
         cx, cy = int(lm.x * w), int(lm.y * h)
         cv2.circle(img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
     return img
@@ -40,7 +40,7 @@ def draw_class_on_image(label, img):
     font = cv2.FONT_HERSHEY_SIMPLEX
     bottomLeftCornerOfText = (10, 30)
     fontScale = 1
-    fontColor = (0, 255, 0)
+    fontColor = (0, 0, 255)
     thickness = 2
     lineType = 2
     cv2.putText(img, label,
@@ -52,14 +52,14 @@ def draw_class_on_image(label, img):
                 lineType)
     return img
 
-
+#đưa vào model nhận diện
 def detect(model, lm_list):
     global label
     lm_list = np.array(lm_list)
     lm_list = np.expand_dims(lm_list, axis=0)
-    print(lm_list.shape)
+    #print(lm_list.shape)
     results = model.predict(lm_list)
-    print(results)
+    #print(results)
     if results[0][0] > 0.5:
         label = "SWING BODY"
     else:
@@ -76,8 +76,8 @@ while True:
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = pose.process(imgRGB)
     i = i + 1
-    if i > warmup_frames:
-        print("Start detect....")
+    if i > warmup_frames:   #sau warmup_frame mới bđ detect_cho tg chuẩn bị
+        #print("Starting detect....")
 
         if results.pose_landmarks:
             c_lm = make_landmark_timestep(results)
@@ -85,7 +85,7 @@ while True:
             lm_list.append(c_lm)
             if len(lm_list) == n_time_steps:
                 # predict
-                t1 = threading.Thread(target=detect, args=(model, lm_list,))
+                t1 = threading.Thread(target=detect, args=(model, lm_list,))    #xử lý ở luồng riêng tránh treo luồng main
                 t1.start()
                 lm_list = []
 

@@ -1,0 +1,33 @@
+Nội dung: 	Nhận diện hành vi cơ bản con người
+		Gồm 2 chức năng: lắc người, lắc tay. 
+Công nghệ sử dụng:
+	+ MediaPose
+	+ Opencv
+	+ Tensorflow( Keras: LSTM, Sequential, ...)
+	+ Pandas
+Giải quyết vấn đề:
+Gồm 3 phần:
+	+ Tạo dữ liệu:	- Sừ dụng mediapose mp nhận diện pose từ camera: nếu phát hiện skeleton thì thực hiện: Lưu dưới dạng list mảng. 
+																	ghi thông số khung xương, vẽ khung xương.
+				- Viết vào file csv.
+	+ Train dữ liệu:	- Thực hiện đọc file csv từng hành vi.
+				- Sử dụng LTSM bằng cách ghép 10 frames liên tiếp -> 10 timesteps.
+				- Đánh số label cho 2 hành vi bằng 0 và 1.
+				- Tách bộ dữ liệu cho train, test với train_test_split của sklearn.
+				- Phân chồng các lớp với Sequential của keras rồi train.
+				- Lưu vào file model.h5
+	+ Chương trình chạy:	
+					- Load model train model.h5.
+					- Có quãng nghỉ frames cho thời gian chuẩn bị.
+					- Chạy vòng lặp vô hạn nhận pose từ camera, nhận 10 frames 1 lần rồi chuyển sang xử lý ở luồng con.
+					- Dự đoán sau đó phân ra kết quả thông qua chỉ số nhãn label.
+Khó khăn, hạn chế:
+			+ Còn giới hạn về hành vi.
+			+ Còn phải tạo dữ liệu và lưu file bằng thủ công, chưa tự động.
+			+ Gặp vấn đề trong việc tổng hợp hành vi (bị ngắt quãng, ...).
+			+ Chưa phân biệt được tay/người đứng yên với tay/người cử động.
+Khắc phục:
+	+ Sử dụng phương pháp lstm tránh hiện tượng vanishing gradient.
+	+ Tạo thêm data để train và thực hiện đánh lại nhãn.
+	+ Train với số lượng frame lơn hơn.
+
